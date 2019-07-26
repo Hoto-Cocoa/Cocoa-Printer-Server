@@ -71,7 +71,7 @@ require('net').createServer(async s => {
 	}
 	let data = '';
 	logger.info(`Saving temporary data file to "${r.id}_${date}"...`);
-	s.pipe(fs.createWriteStream(`${cwd}/tmp/${r.id}_${date}`));ㅓㅓㅏ
+	s.pipe(fs.createWriteStream(`${cwd}/tmp/${r.id}_${date}`));
 	s.on('data', d => data += d);
 	s.on('end', () => {
 		if(!data.startsWith('%-12345X')) {
@@ -473,8 +473,8 @@ require('http').createServer(async (req, res) => {
 										<td>${new Date(e.createdAt).toISOString()}</td>
 										<td>${decodeURIComponent(e.email)}</td>
 										<td>${e.username}</td>
-										<td>${!!e.approved}${data.id === e.id ? '' : ' (<a href="/admin?action=toggleUserApproved&u=${e.id}">Toggle</a>)'}</td>
-										<td>${!!e.admin}${data.id === e.id ? '' : ' (<a href="/admin?action=toggleUserAdmin&u=${e.id}">Toggle</a>)'}</td>
+										<td>${!!e.approved}${data.id === e.id ? '' : ` (<a href="/admin?action=toggleUserApproved&u=${e.id}">Toggle</a>)`}</td>
+										<td>${!!e.admin}${data.id === e.id ? '' : ` (<a href="/admin?action=toggleUserAdmin&u=${e.id}">Toggle</a>)`}</td>
 										<td>${e.activeIp}</td>
 										<td>${e.pdfCount}</td>
 										<td>${e.printCount}</td>

@@ -20,7 +20,12 @@ const Database = class Database {
 
 	query(sql, ...args) {
 		this.logger.debug(`Database Query: "${sql}"${args.length ? `, with params[${args.join(', ')}]` : ''}`);
-		return new Promise((resolve, reject) => this.db.prepare(sql).all(args, (e, r) => e ? reject(e) : r.length === 1 ? Object.keys(r[0]).length === 1 ? resolve(r[0][Object.keys(r[0])[0]]) : resolve(r[0]) : resolve(r)).finalize());
+		return new Promise((resolve, reject) => this.db.prepare(sql).all(args, (e, r) => e ? reject(e) : r.length === 1 ? Object.keys(r[0]).length === 1 ? resolve(r[0][Object.keys(r[0])[0]]) : resolve(r[0]) : r.length === 0 ? resolve(false) : resolve(r)).finalize());
+	}
+
+	queryRaw(sql, ...args) {
+		this.logger.debug(`Database Query: "${sql}"${args.length ? `, with params[${args.join(', ')}]` : ''}`);
+		return new Promise((resolve, reject) => this.db.prepare(sql).all(args, (e, r) => e ? reject(e) : resolve(r)));
 	}
 }
 
@@ -52,11 +57,6 @@ const db = new Database('data.sqlite3', logger);
 
 fs.exists(`${cwd}/data`, r => r || fs.mkdir(`${cwd}/data`, e => e ? logger.error(`Failed to create data directory.\nStack: ${e.stack}`) : logger.notice('Created data directory.')));
 fs.exists(`${cwd}/tmp`, r => r || fs.mkdir(`${cwd}/tmp`, e => e ? logger.error(`Failed to create tmp directory.\nStack: ${e.stack}`) : logger.notice('Created tmp directory.')))
-db.query('SELECT id FROM user ORDER BY id DESC LIMIT 1;').then(r => {
-	if(r) for(let i = 1; i <= r.id; i++) {
-		fs.mkdir(`${cwd}/data/${i}`, e => e ? e.code === 'EEXIST' ? '' : logger.error(`Failed to create data/${i} directory.\nStack: ${e.stack}`) : logger.notice(`Created data/${i} directory.`));
-	}
-}).catch(e => logger.error(`Error while database query to make user directories: ${e.stack}`));
 
 require('net').createServer(async s => {
 	const date = Date.now(), remoteAddr = s.remoteAddress.substring(7);
@@ -71,7 +71,7 @@ require('net').createServer(async s => {
 	}
 	let data = '';
 	logger.info(`Saving temporary data file to "${r.id}_${date}"...`);
-	s.pipe(fs.createWriteStream(`${cwd}/tmp/${r.id}_${date}`));
+	s.pipe(fs.createWriteStream(`${cwd}/tmp/${r.id}_${date}`));ㅓㅓㅏ
 	s.on('data', d => data += d);
 	s.on('end', () => {
 		if(!data.startsWith('%-12345X')) {
@@ -139,12 +139,12 @@ require('http').createServer(async (req, res) => {
 							res.statusCode = 400;
 							return res.end(`<title>Error!</title>${style.global}Invalid POST Body!`);
 						}
-						const queryData = await db.query('SELECT password FROM user WHERE username=(?);', form.username);
-						if(!queryData.password) {
+						const password = await db.query('SELECT password FROM user WHERE username=(?);', form.username);
+						if(!password) {
 							res.statusCode = 400;
 							return res.end(`<title>No such user!</title>${style.global}No such user! Please check username that you entered.<br>Or <a href="/register">register</a>?`);
 						}
-						const iv = Buffer.from(queryData.password.split('@')[1], 'hex');
+						const iv = Buffer.from(password.split('@')[1], 'hex');
 						const chiper = crypto.createCipheriv('aes-256-gcm', Buffer.from('Hoto_Cocoa_=_A_Cute_Charactor!!!'), iv), encrypted = `${Buffer.concat([ chiper.update(form.password), chiper.final() ]).toString('hex')}@${iv.toString('hex')}`;
 						if(await db.query('SELECT id FROM user WHERE username=(?) AND password=(?);', form.username, encrypted)) {
 							res.setHeader('Set-Cookie', `auth=${Buffer.from(`username=${form.username};password=${encrypted}`).toString('base64')}; HttpOnly`);
@@ -200,7 +200,7 @@ require('http').createServer(async (req, res) => {
 							return res.end(`<title>Error!</title>${style.global}Invalid POST Body!`);
 						}
 						const iv = crypto.randomBytes(16), chiper = crypto.createCipheriv('aes-256-gcm', Buffer.from('Hoto_Cocoa_=_A_Cute_Charactor!!!'), iv), encrypted = `${Buffer.concat([ chiper.update(form.password), chiper.final() ]).toString('hex')}@${iv.toString('hex')}`;
-						db.query('INSERT INTO user(createdAt, email, username, password, activeIp) VALUES((?), (?), (?), (?), (?));', Date.now(), form.email, form.username, encrypted, req.connection.remoteAddress.substring(7)).then(() => {
+						db.query('INSERT INTO user(createdAt, email, username, password, activeIp) VALUES((?), (?), (?), (?), (?));', Date.now(), form.email, form.username, encrypted, (req.connection.remoteAddress.substring(7).startsWith('127') && req.headers['x-forwarded-for']) ? req.headers['x-forwarded-for'].split(':')[0] : req.connection.remoteAddress.substring(7)).then(() => {
 							res.setHeader('Set-Cookie', `auth=${Buffer.from(`username=${form.username};password=${encrypted}`).toString('base64')}; HttpOnly`);
 							res.setHeader('Location', url.query.return ? Buffer.from(url.query.return, 'base64').toString() === '/' ? '/list' : Buffer.from(url.query.return, 'base64').toString() : '/list');
 							res.statusCode = 302;
@@ -230,7 +230,7 @@ require('http').createServer(async (req, res) => {
 				res.statusCode = 401;
 				return res.end(`<title>Need login!</title>${style.global}Please <a href="/login?return=${Buffer.from(url.pathname).toString('base64')}">login</a> to continue.`);
 			}
-			db.query('UPDATE user SET activeIp=(?) WHERE id=(?)', req.connection.remoteAddress.substring(7), r).then(() => {
+			db.query('UPDATE user SET activeIp=(?) WHERE id=(?)', (req.connection.remoteAddress.substring(7).startsWith('127') && req.headers['x-forwarded-for']) ? req.headers['x-forwarded-for'].split(':')[0] : req.connection.remoteAddress.substring(7), r).then(() => {
 				res.setHeader('Location', url.query.return ? Buffer.from(url.query.return, 'base64').toString() === '/' ? '/list' : Buffer.from(url.query.return, 'base64').toString() : '/list');
 				res.statusCode = 302;
 				return res.end(`<title>Redirecting...</title>${style.global}Redirecting to <a href="${url.query.return ? Buffer.from(url.query.return, 'base64').toString() === '/' ? '/list' : Buffer.from(url.query.return, 'base64').toString() : '/list'}">${url.query.return ? Buffer.from(url.query.return, 'base64').toString() === '/' ? '/list' : Buffer.from(url.query.return, 'base64').toString() : '/list'}</a>...`);
@@ -273,7 +273,7 @@ require('http').createServer(async (req, res) => {
 					</table>
 					<i>Current Timezone: UTC</i><br>
 					<i>Account Status: ${data.admin ? 'Admin User (<a href="/admin">Control Panel</a>)' : data.approved ? 'Normal User' : 'Pending Approval'}</i><br>
-					<i>Your connection IP: ${req.connection.remoteAddress.substring(7)}, Allowed Connection IP: ${data.activeIp ? data.activeIp : 'Unconfigured'} ${req.connection.remoteAddress.substring(7) === data.activeIp ? '(Match)' : '(<a href="/updateIp">Update IP</a>)'}</i><br>
+					<i>Your connection IP: ${(req.connection.remoteAddress.substring(7).startsWith('127') && req.headers['x-forwarded-for']) ? req.headers['x-forwarded-for'].split(':')[0] : req.connection.remoteAddress.substring(7)}, Allowed Connection IP: ${data.activeIp ? data.activeIp : 'Unconfigured'} ${((req.connection.remoteAddress.substring(7).startsWith('127') && req.headers['x-forwarded-for']) ? req.headers['x-forwarded-for'].split(':')[0]  : req.connection.remoteAddress.substring(7)) === data.activeIp ? '(Match)' : '(<a href="/updateIp">Update IP</a>)'}</i><br>
 					<i>Made by Hoto-Cocoa. Copyright (C) 2019 Hoto-Cocoa, All Rights Reserved.</i><br>
 					<i><a href="/open-source-licenses">Open Source Licenses</a></i>
 				`);
@@ -392,7 +392,7 @@ require('http').createServer(async (req, res) => {
 			fs.exists(`${cwd}/data/${query.f}.pdf`, r => {
 				if(r) {
 					gs.execute(`-dPrinted -dBATCH -dNOPAUSE -dNOSAFER -dNumCopies=1 -sDEVICE=mswinpr2 -sOutputFile="%printer%SL-J1660" "${cwd}/data/${query.f}.pdf"`).then(() => {
-						logger.info(`${data.id}(${req.connection.remoteAddress.substring(7)}) Printed ${query.f}.`);
+						logger.info(`${data.id}(${(req.connection.remoteAddress.substring(7).startsWith('127') && req.headers['x-forwarded-for']) ? req.headers['x-forwarded-for'].split(':')[0] : req.connection.remoteAddress.substring(7)}) Printed ${query.f}.`);
 						db.query('UPDATE user SET printCount=printCount+1 WHERE id=(?);', data.id)
 						return res.end(`<title>Result</title><script>alert('Printed.'); document.location.href='../list';</script>`);
 					}).catch(e => {
@@ -436,7 +436,7 @@ require('http').createServer(async (req, res) => {
 			}
 			switch(url.query.action ? url.query.action : '') {
 				case '': {
-					const userList = await db.query('SELECT * FROM user;');
+					const userList = await db.queryRaw('SELECT * FROM user;');
 					fs.readdir(`${cwd}/data/`, (e, r) => {
 						if(e) {
 							logger.error(`Error while read user data directory of ${data.id}: ${e.stack}`);

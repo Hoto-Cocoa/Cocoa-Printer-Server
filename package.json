@@ -1,0 +1,33 @@
+{
+  "private": true,
+  "name": "cocoa-printer-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "exit 0;"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hoto-Cocoa/Cocoa-Printer-Server.git"
+  },
+  "keywords": [
+    "printer",
+    "pdf",
+    "forward",
+    "usb",
+    "ip"
+  ],
+  "author": "Hoto Cocoa <cocoa@hoto.us>",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/Hoto-Cocoa/Cocoa-Printer-Server/issues"
+  },
+  "homepage": "https://github.com/Hoto-Cocoa/Cocoa-Printer-Server#readme",
+  "dependencies": {
+    "ghostscript4js": "^3.1.1",
+    "sequelize": "^5.10.2",
+    "sqlite3": "^4.0.9",
+    "winston": "^3.2.1"
+  }
+}

@@ -90,7 +90,7 @@ require('net').createServer(async s => {
 require('http').createServer(async (req, res) => {
 	const url = URL.parse(req.url, true);
 	const cookies = {};
-	for(let i = 0, cookieArr = req.headers.cookie ? req.headers.cookie.split(';') : []; i < cookieArr.length; i++) cookies[cookieArr[i].split('=')[0]] = cookieArr[i].split('=')[1];
+	for(let i = 0, cookieArr = req.headers.cookie ? req.headers.cookie.split('; ') : []; i < cookieArr.length; i++) cookies[cookieArr[i].split('=')[0]] = cookieArr[i].split('=')[1];
 	switch(url.pathname.substring(1)) {
 		case '': {
 			if(cookies.auth) {

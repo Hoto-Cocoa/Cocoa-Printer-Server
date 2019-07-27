@@ -145,7 +145,7 @@ require('http').createServer(async (req, res) => {
 							return res.end(`<title>No such user!</title>${style.global}No such user! Please check username that you entered.<br>Or <a href="/register">register</a>?`);
 						}
 						const iv = Buffer.from(password.split('@')[1], 'hex');
-						const chiper = crypto.createCipheriv('aes-256-gcm', Buffer.from('Hoto_Cocoa_=_A_Cute_Charactor!!!'), iv), encrypted = `${Buffer.concat([ chiper.update(form.password), chiper.final() ]).toString('hex')}@${iv.toString('hex')}`;
+						const chiper = crypto.createCipheriv('aes-256-gcm', Buffer.from(config.encryptKey), iv), encrypted = `${Buffer.concat([ chiper.update(form.password), chiper.final() ]).toString('hex')}@${iv.toString('hex')}`;
 						if(await db.query('SELECT id FROM user WHERE username=(?) AND password=(?);', form.username, encrypted)) {
 							res.setHeader('Set-Cookie', `auth=${Buffer.from(`username=${form.username};password=${encrypted}`).toString('base64')}; HttpOnly`);
 							res.setHeader('Location', url.query.return ? Buffer.from(url.query.return, 'base64').toString() === '/' ? '/list' : Buffer.from(url.query.return, 'base64').toString() : '/list');
@@ -199,12 +199,19 @@ require('http').createServer(async (req, res) => {
 							res.statusCode = 400;
 							return res.end(`<title>Error!</title>${style.global}Invalid POST Body!`);
 						}
-						const iv = crypto.randomBytes(16), chiper = crypto.createCipheriv('aes-256-gcm', Buffer.from('Hoto_Cocoa_=_A_Cute_Charactor!!!'), iv), encrypted = `${Buffer.concat([ chiper.update(form.password), chiper.final() ]).toString('hex')}@${iv.toString('hex')}`;
+						const iv = crypto.randomBytes(16), chiper = crypto.createCipheriv('aes-256-gcm', Buffer.from(config.encryptKey), iv), encrypted = `${Buffer.concat([ chiper.update(form.password), chiper.final() ]).toString('hex')}@${iv.toString('hex')}`;
 						db.query('INSERT INTO user(createdAt, email, username, password, activeIp) VALUES((?), (?), (?), (?), (?));', Date.now(), form.email, form.username, encrypted, (req.connection.remoteAddress.substring(7).startsWith('127') && req.headers['x-forwarded-for']) ? req.headers['x-forwarded-for'].split(':')[0] : req.connection.remoteAddress.substring(7)).then(() => {
 							res.setHeader('Set-Cookie', `auth=${Buffer.from(`username=${form.username};password=${encrypted}`).toString('base64')}; HttpOnly`);
 							res.setHeader('Location', url.query.return ? Buffer.from(url.query.return, 'base64').toString() === '/' ? '/list' : Buffer.from(url.query.return, 'base64').toString() : '/list');
 							res.statusCode = 302;
 							return res.end(`<title>Redirecting...</title>${style.global}Redirecting to <a href="${url.query.return ? Buffer.from(url.query.return, 'base64').toString() === '/' ? '/list' : Buffer.from(url.query.return, 'base64').toString() : '/list'}">${url.query.return ? Buffer.from(url.query.return, 'base64').toString() === '/' ? '/list' : Buffer.from(url.query.return, 'base64').toString() : '/list'}</a>...`);
+						}).then(async () => {
+							const insertId = await db.query('SELECT last_insert_rowid();');
+							if(insertId === 1) db.query('UPDATE user SET approved=1 AND admin=1 WHERE id=1;').catch(e => {
+								logger.error(`Error while make admin for first user(${req.connection.remoteAddress}): ${e.stack}`);
+								res.statusCode = 500;
+								return res.end(`<title>Error!</title>${style.global}Error while database query: ${e.message}`);
+							})
 						}).catch(e => {
 							logger.error(`Error while ${req.connection.remoteAddress} registering: ${e.stack}`);
 							res.statusCode = 500;
@@ -275,6 +282,7 @@ require('http').createServer(async (req, res) => {
 					<i>Account Status: ${data.admin ? 'Admin User (<a href="/admin">Control Panel</a>)' : data.approved ? 'Normal User' : 'Pending Approval'}</i><br>
 					<i>Your connection IP: ${(req.connection.remoteAddress.substring(7).startsWith('127') && req.headers['x-forwarded-for']) ? req.headers['x-forwarded-for'].split(':')[0] : req.connection.remoteAddress.substring(7)}, Allowed Connection IP: ${data.activeIp ? data.activeIp : 'Unconfigured'} ${((req.connection.remoteAddress.substring(7).startsWith('127') && req.headers['x-forwarded-for']) ? req.headers['x-forwarded-for'].split(':')[0]  : req.connection.remoteAddress.substring(7)) === data.activeIp ? '(Match)' : '(<a href="/updateIp">Update IP</a>)'}</i><br>
 					<i>Made by Hoto-Cocoa. Copyright (C) 2019 Hoto-Cocoa, All Rights Reserved.</i><br>
+					<i>This application's code under AGPLv3.0, Full license terms on <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">GNU Site</a>.</i><br>
 					<i><a href="/open-source-licenses">Open Source Licenses</a></i>
 				`);
 			})
@@ -391,7 +399,7 @@ require('http').createServer(async (req, res) => {
 			}
 			fs.exists(`${cwd}/data/${query.f}.pdf`, r => {
 				if(r) {
-					gs.execute(`-dPrinted -dBATCH -dNOPAUSE -dNOSAFER -dNumCopies=1 -sDEVICE=mswinpr2 -sOutputFile="%printer%SL-J1660" "${cwd}/data/${query.f}.pdf"`).then(() => {
+					gs.execute(`-dPrinted -dBATCH -dNOPAUSE -dNOSAFER -dNumCopies=1 -sDEVICE=mswinpr2 -sOutputFile="%printer%${config.printerName}" "${cwd}/data/${query.f}.pdf"`).then(() => {
 						logger.info(`${data.id}(${(req.connection.remoteAddress.substring(7).startsWith('127') && req.headers['x-forwarded-for']) ? req.headers['x-forwarded-for'].split(':')[0] : req.connection.remoteAddress.substring(7)}) Printed ${query.f}.`);
 						db.query('UPDATE user SET printCount=printCount+1 WHERE id=(?);', data.id)
 						return res.end(`<title>Result</title><script>alert('Printed.'); document.location.href='../list';</script>`);

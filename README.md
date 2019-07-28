@@ -13,7 +13,7 @@ You need GhostScript. Version 9.20 and 9.23 Tested, 9.20 will NOT work. Please u
 	}
 	```
 1. Type `npm start` to start application.
-1. Open [127.0.0.1:8080](https://127.0.0.1:8080) or ServerIp:8080, and register to site. The application will give admin permission to first user.
+1. Open [127.0.0.1:8080](http://127.0.0.1:8080) or ServerIp:8080, and register to site. The application will give admin permission to first user.
 1. Add printer to your system. You may see error message like "Printer not responding", Just ignore that and continue. Please select driver that uses PostScript like "Microsoft PS Class Driver". If you planing to use this application to bypass printer restriction, Please install driver that approved in that site. If you select driver that not PostScript driver, This applicaton will drop your print.
 
 You may need make 8080 port and 9100 port open. Please allow network connection If System Firewall or Anti-Virus asks for allow that.

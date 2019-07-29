@@ -18,5 +18,10 @@ You need GhostScript. Version 9.20 and 9.23 Tested, 9.20 will NOT work. Please u
 
 You may need make 8080 port and 9100 port open. Please allow network connection If System Firewall or Anti-Virus asks for allow that.
 
+## More Configuration
+If you want passthru mode? or No IP Filtering for Internal Network? You can add configuration value to that.
+* If you set "passthru" to true, The server not saving any requests to file, Just print document and delete temporary file.
+* If you set "allowAll" to true, The server not filtering any IP and make accesible from any IP addresses to any document. You can use passthru mode to block see other people see document by not saving pdf file.
+
 ## Contribution
 If any questions or problems? Please open Issue! I will support your questions or problems.

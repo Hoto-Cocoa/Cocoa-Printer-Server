@@ -1,6 +1,6 @@
-*data*
-*tmp*
-node_modules
+*data*/
+*tmp*/
+node_modules/
 *sqlite3*
 *.log*
 config.json

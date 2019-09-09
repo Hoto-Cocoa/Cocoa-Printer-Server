@@ -240,6 +240,7 @@ require('http').createServer(async (req, res) => {
 			} break;
 			case 'view': {
 				const query = url.query;
+				let data;
 				if(!config.allowAll) {
 					if(!cookies.auth) {
 						res.statusCode = 401;
@@ -247,7 +248,7 @@ require('http').createServer(async (req, res) => {
 					}
 					const auth = {};
 					for(let i = 0, authArr = cookies.auth ? Buffer.from(cookies.auth, 'base64').toString().split(';') : []; i < authArr.length; i++) auth[authArr[i].split('=')[0]] = authArr[i].split('=')[1];
-					const data = await db.query('SELECT id, admin FROM user WHERE username=(?) AND password=(?);', auth.username, auth.password);
+					data = await db.query('SELECT id, admin FROM user WHERE username=(?) AND password=(?);', auth.username, auth.password);
 					if(!data) {
 						res.statusCode = 401;
 						return res.end(`<title>Need login!</title>${style.global}Please <a href="/login?return=${Buffer.from(url.pathname).toString('base64')}">login</a> to continue.`);
@@ -284,6 +285,7 @@ require('http').createServer(async (req, res) => {
 			} break;
 			case 'save': {
 				const query = url.query;
+				let data;
 				if(!config.allowAll) {
 					if(!cookies.auth) {
 						res.statusCode = 401;
@@ -291,7 +293,7 @@ require('http').createServer(async (req, res) => {
 					}
 					const auth = {};
 					for(let i = 0, authArr = cookies.auth ? Buffer.from(cookies.auth, 'base64').toString().split(';') : []; i < authArr.length; i++) auth[authArr[i].split('=')[0]] = authArr[i].split('=')[1];
-					const data = await db.query('SELECT id, admin FROM user WHERE username=(?) AND password=(?);', auth.username, auth.password);
+					data = await db.query('SELECT id, admin FROM user WHERE username=(?) AND password=(?);', auth.username, auth.password);
 					if(!data) {
 						res.statusCode = 401;
 						return res.end(`<title>Need login!</title>${style.global}Please <a href="/login?return=${Buffer.from(url.pathname).toString('base64')}">login</a> to continue.`);
@@ -331,6 +333,7 @@ require('http').createServer(async (req, res) => {
 			} break;
 			case 'print': {
 				const query = url.query;
+				let data;
 				if(!config.allowAll) {
 					if(!cookies.auth) {
 						res.statusCode = 401;
@@ -338,7 +341,7 @@ require('http').createServer(async (req, res) => {
 					}
 					const auth = {};
 					for(let i = 0, authArr = cookies.auth ? Buffer.from(cookies.auth, 'base64').toString().split(';') : []; i < authArr.length; i++) auth[authArr[i].split('=')[0]] = authArr[i].split('=')[1];
-					const data = await db.query('SELECT id, admin FROM user WHERE username=(?) AND password=(?);', auth.username, auth.password);
+					data = await db.query('SELECT id, admin FROM user WHERE username=(?) AND password=(?);', auth.username, auth.password);
 					if(!data) {
 						res.statusCode = 401;
 						return res.end(`<title>Need login!</title>${style.global}Please <a href="/login?return=${Buffer.from(url.pathname).toString('base64')}">login</a> to continue.`);
@@ -356,7 +359,7 @@ require('http').createServer(async (req, res) => {
 						return res.end(`<title>Error!</title>${style.global}You not have permission to access to requested file.`);
 					}
 				} else {
-					data = { id: 0};
+					data = { id: 0 };
 				}
 				fs.exists(`${cwd}/data/${query.f}.pdf`, r => {
 					if(r) {

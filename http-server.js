@@ -207,7 +207,6 @@ require('http').createServer(async (req, res) => {
 						res.statusCode = 400;
 						return res.end(`<title>Invalid User ID!</title>${style.global}Please contact to administrator.`);
 					}
-					return res.end(`<title>Cocoa's Printer Server</title>${style.global}Please <a href="/login?return=${Buffer.from(url.pathname).toString('base64')}">login</a> or <a href="/register?return=${Buffer.from(url.pathname).toString('base64')}">register</a> to continue.`);
 				} else {
 					data = { id: 0, approved: 1, activeIp: remoteAddr };
 				}

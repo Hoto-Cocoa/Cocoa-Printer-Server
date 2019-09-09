@@ -385,7 +385,7 @@ require('http').createServer(async (req, res) => {
 				}
 				fs.exists(`${cwd}/data/${query.f}.pdf`, r => {
 					if(r) {
-						gs.execute(`-dPrinted -dBATCH -dNOPAUSE -dNOSAFER -dNumCopies=1 -sDEVICE=mswinpr2 -sOutputFile="%printer%${config.printerName}" "${cwd}/data/${query.f}.pdf"`).then(() => {
+						gs.execute(`-dPrinted -dBATCH -dNOPAUSE -dNOSAFER -dNumCopies=1 -sDEVICE=mswinpr2 -sPAPERSIZE=a4 -sOutputFile="%printer%${config.printerName}" "${cwd}/data/${query.f}.pdf"`).then(() => {
 							logger.info(`${data.id}(${remoteAddr}) Printed ${query.f}.`);
 							if(!config.allowAll) db.query('UPDATE user SET printCount=printCount+1 WHERE id=(?);', data.id);
 							return res.end(`<title>Result</title><script>alert('Printed.'); document.location.href='../list';</script>`);

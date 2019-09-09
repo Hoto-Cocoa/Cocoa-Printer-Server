@@ -56,19 +56,7 @@ require('http').createServer(async (req, res) => {
 				}
 			} break;
 			case 'login': {
-				if(!config.allowAll) {
-					if(cookies.auth) {
-						const auth = {};
-						for(let i = 0, authArr = cookies.auth ? Buffer.from(cookies.auth, 'base64').toString().split(';') : []; i < authArr.length; i++) auth[authArr[i].split('=')[0]] = authArr[i].split('=')[1];
-						const r = await db.query('SELECT id FROM user WHERE username=(?) AND password=(?);', auth.username, auth.password);
-						if(r) {
-							res.statusCode = 302;
-							res.setHeader('Location', '/list');
-							res.end(`<title>Redirecting...</title>${style.global}Redirecting to <a href="/list">/list</a>...`);
-						}
-					}
-					return res.end(`<title>Cocoa's Printer Server</title>${style.global}Please <a href="/login?return=${Buffer.from(url.pathname).toString('base64')}">login</a> or <a href="/register?return=${Buffer.from(url.pathname).toString('base64')}">register</a> to continue.`);
-				} else {
+				if(config.allowAll) {
 					res.statusCode = 302;
 					res.setHeader('Location', '/list');
 					res.end(`<title>Redirecting...</title>${style.global}Redirecting to <a href="/list">/list</a>...`);
@@ -121,19 +109,7 @@ require('http').createServer(async (req, res) => {
 				}
 			} break;
 			case 'register': {
-				if(!config.allowAll) {
-					if(cookies.auth) {
-						const auth = {};
-						for(let i = 0, authArr = cookies.auth ? Buffer.from(cookies.auth, 'base64').toString().split(';') : []; i < authArr.length; i++) auth[authArr[i].split('=')[0]] = authArr[i].split('=')[1];
-						const r = await db.query('SELECT id FROM user WHERE username=(?) AND password=(?);', auth.username, auth.password);
-						if(r) {
-							res.statusCode = 302;
-							res.setHeader('Location', '/list');
-							res.end(`<title>Redirecting...</title>${style.global}Redirecting to <a href="/list">/list</a>...`);
-						}
-					}
-					return res.end(`<title>Cocoa's Printer Server</title>${style.global}Please <a href="/login?return=${Buffer.from(url.pathname).toString('base64')}">login</a> or <a href="/register?return=${Buffer.from(url.pathname).toString('base64')}">register</a> to continue.`);
-				} else {
+				if(config.allowAll) {
 					res.statusCode = 302;
 					res.setHeader('Location', '/list');
 					res.end(`<title>Redirecting...</title>${style.global}Redirecting to <a href="/list">/list</a>...`);

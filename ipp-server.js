@@ -23,17 +23,18 @@ require('net').createServer(async s => {
 	const date = Date.now(), remoteAddr = s.remoteAddress.substring(7);
 	let r;
 	if(!config.allowAll) {
-		r = await db.query('SELECT id, username, approved FROM user WHERE activeIp=(?);', remoteAddr);
-		if(!r) {
-			logger.info(`Dropped document from Not Registered IP ${remoteAddr}.`);
-			return s.end('Not Registered.');
-		}
-		if(!r.approved) {
-			logger.info(`Dropped document from Not Approvd Account ${r.id}(${remoteAddr}).`);
-			return s.end('Not Approved.');
-		}
 		if(remoteAddr === '127.0.0.1' || remoteAddr === '::1') {
 			r = { id: 1 };
+		} else {
+			r = await db.query('SELECT id, username, approved FROM user WHERE activeIp=(?);', remoteAddr);
+			if(!r) {
+				logger.info(`Dropped document from Not Registered IP ${remoteAddr}.`);
+				return s.end('Not Registered.');
+			}
+			if(!r.approved) {
+				logger.info(`Dropped document from Not Approvd Account ${r.id}(${remoteAddr}).`);
+				return s.end('Not Approved.');
+			}
 		}
 	} else {
 		r = { id: 0 };

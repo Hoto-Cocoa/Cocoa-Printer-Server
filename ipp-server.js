@@ -32,6 +32,9 @@ require('net').createServer(async s => {
 			logger.info(`Dropped document from Not Approvd Account ${r.id}(${remoteAddr}).`);
 			return s.end('Not Approved.');
 		}
+		if(remoteAddr === '127.0.0.1' || remoteAddr === '::1') {
+			r = { id: 1 };
+		}
 	} else {
 		r = { id: 0 };
 	}
@@ -42,7 +45,7 @@ require('net').createServer(async s => {
 	s.on('end', () => {
 		if(!data.startsWith('%-12345X')) {
 			logger.error('This PJL not supported! Please use PS Printer Driver.');
-			return;
+			return s.end('Not Supported.');
 		}
 		if(config.passthru) {
 			logger.info(`Saved tmp file from ${r.id}(${remoteAddr}) to "${cwd}/tmp/${r.id}_${date}". Printing...`);

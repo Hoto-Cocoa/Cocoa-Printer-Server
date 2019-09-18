@@ -64,4 +64,5 @@ require('net').createServer(async s => {
 			}).catch(e => logger.error(e.stack));
 		}
 	});
+	s.on('error', e => logger.error(e.stack));
 }).listen(9100);

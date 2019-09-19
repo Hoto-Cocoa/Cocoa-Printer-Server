@@ -23,7 +23,7 @@ const cwd = process.cwd();
 const URL = require('url');
 const crypto = require('crypto');
 const style = {
-	table: `<style>table { border-collapse: collapse; width: 100% } td, th { border: 1px solid #DDD; text-align: left; padding: 8px } tr:nth-child(even) { background-color: #DDD }</style>`
+	table: `table { border-collapse: collapse; width: 100% } td, th { border: 1px solid #DDD; text-align: left; padding: 8px } tr:nth-child(even) { background-color: #DDD }`
 };
 
 require('http').createServer(async (req, res) => {

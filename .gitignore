@@ -4,3 +4,4 @@ node_modules/
 *sqlite3*
 *.log*
 config.json
+test*

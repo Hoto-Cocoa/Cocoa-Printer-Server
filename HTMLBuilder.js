@@ -5,7 +5,7 @@ module.exports = class HTMLBuilder {
 	}
 
 	build(title, body, style = '', head = '') {
-		return `<title>${title}</title>${this.head}${head}<style>${this.styleBuild(style)}</style>${body}`.replace(/\s?(\n|\t)\s?/gm, '$1').replace(/(^\s*)/gm, '').replace(/>\s*/gm, '>');
+		return `<title>${title}</title>${this.head}${head}<style>${this.styleBuild(style)}</style>${body}`.replace(/\s?(\n|\t)\s?/gm, '$1').replace(/(^\s*)/gm, '').replace(/>\t*/gm, '>');
 	}
 	
 	styleBuild(style = '') {

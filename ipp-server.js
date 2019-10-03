@@ -20,10 +20,10 @@ const fs = require('fs');
 const cwd = process.cwd();
 
 require('net').createServer(async s => {
-	const date = Date.now(), remoteAddr = s.remoteAddress.substring(7);
+	const date = Date.now(), remoteAddr = s.remoteAddress === '::1' ? '127.0.0.1' : s.remoteAddress.substring(7);
 	let r;
 	if(!config.allowAll) {
-		if(remoteAddr === '127.0.0.1' || remoteAddr === '::1') {
+		if(remoteAddr === '127.0.0.1') {
 			r = { id: 1 };
 		} else {
 			r = await db.query('SELECT id, username, approved FROM user WHERE activeIp=(?);', remoteAddr);

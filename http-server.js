@@ -354,17 +354,36 @@ require('http').createServer(async (req, res) => {
 				} else {
 					data = { id: 0 };
 				}
-				fs.exists(`${cwd}/data/${query.f}.pdf`, r => {
+				if(!query.f.match(/[0-9]*_[0-9]{13}/)) {
+					res.statusCode = 400;
+					return res.end(htmlBuilder.build('Error!', 'Your request was malformed.'));
+				}
+				fs.exists(`${cwd}/data/${query.f}.pdf`, async r => {
 					if(r) {
-						gs.execute(`-dPrinted -dBATCH -dNOPAUSE -dNOSAFER -dNumCopies=1 -sDEVICE=mswinpr2 -sPAPERSIZE=a4 -sOutputFile="%printer%${config.printerName}" "${cwd}/data/${query.f}.pdf"`).then(() => {
-							logger.info(`${data.id}(${remoteAddr}) Printed ${query.f}.`);
-							if(!config.allowAll) db.query('UPDATE user SET printCount=printCount+1 WHERE id=(?);', data.id);
-							return res.end(htmlBuilder.build('Result', `<script>alert('Printed.'); document.location.href='../list';</script>`));
-						}).catch(e => {
-							logger.error(`Error while print file "${cwd}/data/${query.f}.pdf": ${e.stack}`);
-							res.statusCode = 500;
-							return res.end(htmlBuilder.build('Error!', `Please contact to administrator with this error code: ${e.code} (GS_Print)`));
-						});
+						switch(process.platform) {
+							case 'win32': {
+								gs.execute(`-dPrinted -dBATCH -dNOPAUSE -dNOSAFER -dNumCopies=1 -sDEVICE=mswinpr2 -sPAPERSIZE=a4 -sOutputFile="%printer%${config.printerName}" "${cwd}/data/${query.f}.pdf"`).then(() => {
+									logger.info(`${data.id}(${remoteAddr}) Printed ${query.f}.`);
+									if(!config.allowAll) db.query('UPDATE user SET printCount=printCount+1 WHERE id=(?);', data.id);
+									return res.end(htmlBuilder.build('Result', `<script>alert('Printed.'); document.location.href='../list';</script>`));
+								}).catch(e => {
+									logger.error(`Error while print file "${cwd}/data/${query.f}.pdf": ${e.stack}`);
+									res.statusCode = 500;
+									return res.end(htmlBuilder.build('Error!', `Please contact to administrator with this error code: ${e.code} (GS_Print)`));
+								});
+							}
+							default: {
+								let { stderr } = await require('util').promisify(require('child_process').exec)(`lp -d "${config.printerName}" "${cwd}/data/${query.f}.pdf"`, { stdio: 'inherit' }).catch(e => ({ stderr: e }));
+								if(stderr) {
+									logger.error(`Error while print file "${cwd}/data/${query.f}.pdf": ${stderr}`);
+									res.statusCode = 500;
+									return res.end(htmlBuilder.build('Error!', `Please contact to administrator with this error code: ${stderr} (LP_Print)`));
+								}
+								logger.info(`${data.id}(${remoteAddr}) Printed ${query.f}.`);
+								if(!config.allowAll) db.query('UPDATE user SET printCount=printCount+1 WHERE id=(?);', data.id);
+								return res.end(htmlBuilder.build('Result', `<script>alert('Printed.'); document.location.href='../list';</script>`));
+							}
+						}
 					} else {
 						res.statusCode = 404;
 						return res.end(htmlBuilder.build('Error!', 'No such file!'));

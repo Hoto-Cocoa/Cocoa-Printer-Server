@@ -456,7 +456,7 @@ require('http').createServer(async (req, res) => {
 								res.statusCode = 400;
 								return res.end(htmlBuilder.build('Result', `<script>alert('You can't change your approved status!'); document.location.href='../admin';</script>`));
 							}
-							db.query('UPDATE user SET approved=approved WHERE id=(?);', url.query.u).then(() => {
+							db.query('UPDATE user SET approved = NOT approved WHERE id=(?);', url.query.u).then(() => {
 								logger.info(`Admin ${data.username} toggled approved status of ${url.query.u}.`);
 								return res.end(htmlBuilder.build('Result', `<script>document.location.href='../admin';</script>`));
 							}).catch((e) => {

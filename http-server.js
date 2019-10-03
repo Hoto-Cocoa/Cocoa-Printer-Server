@@ -410,7 +410,7 @@ require('http').createServer(async (req, res) => {
 								if(!filesHtml.length) filesHtml.push('<tr><td colspan="3" style="text-align: center">No Files!</td></tr>');
 								return res.end(htmlBuilder.build(`Cocoa's Printer Server Control Panel`, `
 									<h2>Welcome to Cocoa's Printer Server Control Panel!</h2>
-									<a href="../list">Return to List</a>
+									<a href="../list">Return to List</a> | <a href="/admin?action=stop">Stop server</a>
 									<table>
 										<caption>User List<caption>
 										<tr>
@@ -482,6 +482,10 @@ require('http').createServer(async (req, res) => {
 								res.statusCode = 500;
 								return res.end(htmlBuilder.build('Error!', `Error code: ${e.code} (DB_UPDATE)`));
 							});
+						} break;
+						case 'stop': {
+							res.end(htmlBuilder.build('Result', `<script>document.location.href='../admin';</script>`));
+							return process.exit(0);
 						} break;
 						default: {
 							res.statusCode = 404;

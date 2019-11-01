@@ -1,6 +1,8 @@
 ## Cocoa-Printer-Server
 Bypass printer restrictions, Save any document to PDF. Make your USB Printer to Network Printer. Supported any Operating System that support network printer.
 
+* [한국어(Korean)](./README.ko.md)
+
 ## Installation
 You need GhostScript. Version 9.20 and 9.23 Tested, 9.20 will NOT work. Please use 9.23 or above.
 1. Clone this repository.

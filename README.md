@@ -23,5 +23,12 @@ If you want passthru mode? or No IP Filtering for Internal Network? You can add 
 * If you set "passthru" to true, The server not saving any requests to file, Just print document and delete temporary file.
 * If you set "allowAll" to true, The server not filtering any IP and make accesible from any IP addresses to any document. You can use passthru mode to block see other people see document by not saving pdf file.
 
+## Build
+```
+npm run pkg
+npm run copy-dep-node
+```
+Executable file will create in `dists` directory.
+
 ## Contribution
 If any questions or problems? Please open Issue! I will support your questions or problems.

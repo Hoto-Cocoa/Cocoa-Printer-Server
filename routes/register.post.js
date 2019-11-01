@@ -1,4 +1,4 @@
-module.exports = function({ res, data, config, htmlBuilder, db, remoteAddr }) {
+module.exports = function({ res, config, htmlBuilder, db, remoteAddr }) {
 	let data = '';
 	req.on('data', d => data += d);
 	req.on('end', async () => {

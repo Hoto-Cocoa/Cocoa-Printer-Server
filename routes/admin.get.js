@@ -33,7 +33,7 @@ module.exports = async function({ res, data, config, htmlBuilder, style, db, url
 		};
 		let filesHtml = [];
 		r.forEach(f => {
-			filesHtml.push(`<tr><td>${new Date(+f.substring(2, f.length - 4)).toISOString()}</td><td><a href="/view?f=${f.substring(0, f.length - 4)}">${f}</a></td><td><a href="/save?f=${f.substring(0, f.length - 4)}&type=pdf">Download</a> | <a href="/print?f=${f.substring(0, f.length - 4)}">Print</a></td>`);
+			filesHtml.push(`<tr><td>${new Date(+f.substring(2, f.length - 4)).toISOString()}</td><td><a href="/view?f=${f.substring(0, f.length - 4)}">${f}</a></td><td><span onclick="print('${f.substring(0, f.length - 4)}', this)">Print</span></td>`);
 		});
 		if(!filesHtml.length) filesHtml.push('<tr><td colspan="3" style="text-align: center">No Files!</td></tr>');
 		return res.end(htmlBuilder.build(`Cocoa's Printer Server Control Panel`, `
@@ -60,6 +60,30 @@ module.exports = async function({ res, data, config, htmlBuilder, style, db, url
 					});
 					if((await response.json()).success) element.innerText = ip;
 				}
+			}
+
+			async function print(id, element) {
+				element.innerText = 'Please wait...';
+				const response = await fetch('/api/print', {
+					method: 'POST',
+					body: JSON.stringify({
+						f: id
+					})
+				});
+				if((await response.json()).success) element.innerText = 'Success';
+				else element.innerText = 'Failed';
+			}
+
+			async function save(id, element) {
+				const response = await fetch('/api/save', {
+					method: 'POST',
+					body: JSON.stringify({
+						type: 'pdf',
+						f: id
+					})
+				});
+				if((await response.json()).success) element.innerText = 'Success';
+				else element.innerText = 'Failed';
 			}
 			</script>
 			<h2>Welcome to Cocoa's Printer Server Control Panel!</h2>

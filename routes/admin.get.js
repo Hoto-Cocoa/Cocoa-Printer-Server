@@ -1,6 +1,6 @@
 const fs = require('fs');
 const cwd = process.cwd();
-module.exports = async function({ res, data, config, htmlBuilder, style, db }) {
+module.exports = async function({ res, data, config, htmlBuilder, style, db, url }) {
 	let user;
 	if(config.allowAll) {
 		res.setHeader('Location', '/list');

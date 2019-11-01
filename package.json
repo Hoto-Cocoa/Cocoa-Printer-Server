@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "bin": "./index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "exit 0;"
+    "test": "exit 0",
+    "pkg": "pkg package.json --out-path dists/ --targets host",
+    "copy-dep-node": "node copy-dep-node"
   },
   "repository": {
     "type": "git",
@@ -29,5 +32,14 @@
     "sequelize": "^5.10.2",
     "sqlite3": "^4.0.9",
     "winston": "^3.2.1"
+  },
+  "devDependencies": {
+    "pkg": "^4.4.0"
+  },
+  "pkg": {
+    "scripts": [
+      "routes/*.js",
+      "api/*.js"
+    ]
   }
 }

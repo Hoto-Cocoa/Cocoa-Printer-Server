@@ -17,7 +17,7 @@ const Database = require('./Database'), db = new Database('data.sqlite3', logger
 const HTMLBuilder = require('./HTMLBuilder'), htmlBuilder = new HTMLBuilder('* { font-family: futura-pt, sans-serif; }', '<link rel="stylesheet" href="https://use.typekit.net/mkg6rly.css">');
 const config = require('./config');
 const fs = require('fs');
-const cwd = process.cwd();
+const cwd = __dirname;
 
 const URL = require('url');
 const style = {

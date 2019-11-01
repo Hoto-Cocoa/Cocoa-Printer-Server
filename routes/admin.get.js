@@ -85,7 +85,7 @@ module.exports = async function({ res, data, config, htmlBuilder, style, db }) {
 						<td>${e.username}</td>
 						<td><span${user.id !== e.id && ` onclick="toggle('UserApproved', ${e.id}, this)"`}>${!!e.approved}</span></td>
 						<td><span${user.id !== e.id && ` onclick="toggle('UserAdmin', ${e.id}, this)"`}">${!!e.admin}</span></td>
-						<td><span onclick="updateIp(${e.id})">${e.activeIp}</span></td>
+						<td><span onclick="updateIp(${e.id}, this)">${e.activeIp}</span></td>
 						<td>${e.pdfCount}</td>
 						<td>${e.printCount}</td>
 					</tr>`

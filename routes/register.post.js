@@ -1,4 +1,6 @@
-module.exports = function({ res, req, config, htmlBuilder, db, remoteAddr }) {
+const crypto = require('crypto');
+
+module.exports = function({ res, req, config, htmlBuilder, db, remoteAddr, url }) {
 	let data = '';
 	req.on('data', d => data += d);
 	req.on('end', async () => {

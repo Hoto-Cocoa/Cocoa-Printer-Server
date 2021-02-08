@@ -47,7 +47,7 @@ require('net').createServer(async s => {
 	s.pipe(fs.createWriteStream(`${cwd}/tmp/${r.id}_${date}`));
 	s.on('data', d => data += d);
 	s.on('end', () => {
-		if(!data.startsWith('%-12345X')) {
+		if(!data.startsWith('%-12345X') && !data.startsWith('%!PS')) {
 			logger.error('This PJL not supported! Please use PS Printer Driver.');
 			return s.end('Not Supported.');
 		}

@@ -18,6 +18,9 @@ const config = require('./config');
 const gs = require('ghostscript4js');
 const fs = require('fs');
 const cwd = process.cwd();
+const os = require('os');
+const osType = os.type();
+const exec = require('util').promisify(require('child_process').exec);
 
 require('net').createServer(async s => {
 	const date = Date.now(), remoteAddr = s.remoteAddress === '::1' ? '127.0.0.1' : s.remoteAddress.substring(7);
@@ -50,7 +53,15 @@ require('net').createServer(async s => {
 		}
 		if(config.passthru) {
 			logger.info(`Saved tmp file from ${r.id}(${remoteAddr}) to "${cwd}/tmp/${r.id}_${date}". Printing...`);
-			gs.execute(`-dPrinted -dBATCH -dNOPAUSE -dNOSAFER -dNumCopies=1 -sDEVICE=mswinpr2 -sOutputFile="%printer%${config.printerName}" "${cwd}/tmp/${r.id}_${date}"`).then(() => {
+			let job = null;
+			switch(osType) {
+				case 'Windows_NT':
+					job = gs.execute(`-dPrinted -dBATCH -dNOPAUSE -dNOSAFER -dNumCopies=1 -sDEVICE=mswinpr2 -sOutputFile="%printer%${config.printerName}" "${cwd}/tmp/${r.id}_${date}"`); break;
+				case 'Darwin':
+				case 'Linux':
+					job = exec(`lpr -P "${config.printerName}" "${cwd}/tmp/${r.id}_${date}"`); break;
+			}	
+			job.then(() => {
 				if(!config.allowAll) db.query('UPDATE user SET printCount=printCount+1 WHERE id=(?);', data.id);
 			}).catch(e => {
 				logger.error(`Error while print file "${cwd}/tmp/${r.id}_${date}": ${e.stack}`);

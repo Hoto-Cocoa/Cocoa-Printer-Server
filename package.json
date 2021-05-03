@@ -28,13 +28,13 @@
   },
   "homepage": "https://github.com/Hoto-Cocoa/Cocoa-Printer-Server#readme",
   "dependencies": {
-    "ghostscript4js": "^3.1.1",
-    "sequelize": "^5.10.2",
-    "sqlite3": "^4.0.9",
-    "winston": "^3.2.1"
+    "ghostscript4js": "^3.2.1",
+    "sequelize": "^5.22.4",
+    "sqlite3": "^4.2.0",
+    "winston": "^3.3.3"
   },
   "devDependencies": {
-    "pkg": "^4.4.0"
+    "pkg": "^4.5.1"
   },
   "pkg": {
     "scripts": [

@@ -21,4 +21,3 @@ fs.exists(`${cwd}/tmp`, r => r || fs.mkdir(`${cwd}/tmp`, e => e ? logger.error(`
 
 require('./ipp-server');
 require('./http-server');
-require('./snmp-server');
